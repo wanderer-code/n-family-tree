@@ -1,5 +1,25 @@
 [
   {
+    "id": "93afa518-dbf4-4022-84e7-e8850fa0bf6c",
+    "data": {
+      "gender": "M",
+      "first name": "میرمهدی",
+      "last name": "امانت",
+      "birthday": "۱۳۲۰",
+      "avatar": ""
+    },
+    "rels": {
+      "children": [
+        "c71339e6-7b79-4b16-a684-d53b381320d8",
+        "c086272b-8592-4a10-8c72-4053a62abdb1",
+        "5582913f-6c1b-496f-8a8b-7ae913115d9c"
+      ],
+      "spouses": [
+        "c2b72d8c-72fe-46fe-b934-25341eeab49f"
+      ]
+    }
+  },
+  {
     "id": "0",
     "rels": {
       "spouses": [],
@@ -30,7 +50,9 @@
         "7b060be6-5b13-422f-b4d9-32f0f0f55bd3",
         "62b8cfea-f198-46ee-bc8f-460e9690676c"
       ],
-      "spouses": ["77b25d09-bc50-4245-af84-ee8383c4e6ec"],
+      "spouses": [
+        "77b25d09-bc50-4245-af84-ee8383c4e6ec"
+      ],
       "father": "93afa518-dbf4-4022-84e7-e8850fa0bf6c",
       "mother": "c2b72d8c-72fe-46fe-b934-25341eeab49f"
     }
@@ -45,7 +67,9 @@
       "avatar": ""
     },
     "rels": {
-      "spouses": ["c71339e6-7b79-4b16-a684-d53b381320d8"],
+      "spouses": [
+        "c71339e6-7b79-4b16-a684-d53b381320d8"
+      ],
       "children": [
         "0",
         "7b060be6-5b13-422f-b4d9-32f0f0f55bd3",
@@ -82,24 +106,6 @@
     }
   },
   {
-    "id": "93afa518-dbf4-4022-84e7-e8850fa0bf6c",
-    "data": {
-      "gender": "M",
-      "first name": "میرمهدی",
-      "last name": "امانت",
-      "birthday": "",
-      "avatar": ""
-    },
-    "rels": {
-      "children": [
-        "c71339e6-7b79-4b16-a684-d53b381320d8",
-        "c086272b-8592-4a10-8c72-4053a62abdb1",
-        "5582913f-6c1b-496f-8a8b-7ae913115d9c"
-      ],
-      "spouses": ["c2b72d8c-72fe-46fe-b934-25341eeab49f"]
-    }
-  },
-  {
     "id": "c2b72d8c-72fe-46fe-b934-25341eeab49f",
     "data": {
       "gender": "F",
@@ -114,7 +120,9 @@
         "c086272b-8592-4a10-8c72-4053a62abdb1",
         "5582913f-6c1b-496f-8a8b-7ae913115d9c"
       ],
-      "spouses": ["93afa518-dbf4-4022-84e7-e8850fa0bf6c"]
+      "spouses": [
+        "93afa518-dbf4-4022-84e7-e8850fa0bf6c"
+      ]
     }
   },
   {
@@ -129,7 +137,9 @@
     "rels": {
       "mother": "c2b72d8c-72fe-46fe-b934-25341eeab49f",
       "father": "93afa518-dbf4-4022-84e7-e8850fa0bf6c",
-      "spouses": ["a8102e4e-ee58-428e-8707-e47a2cad2c89"],
+      "spouses": [
+        "a8102e4e-ee58-428e-8707-e47a2cad2c89"
+      ],
       "children": [
         "c3954b4d-a2a7-49a2-ad8f-0b54d1aea8b2",
         "96a84e5a-79bb-405c-80d3-56dcd72bbc05",
@@ -149,7 +159,9 @@
     "rels": {
       "mother": "c2b72d8c-72fe-46fe-b934-25341eeab49f",
       "father": "93afa518-dbf4-4022-84e7-e8850fa0bf6c",
-      "spouses": ["f67f0063-5857-4a1a-b6f9-4d064d478125"],
+      "spouses": [
+        "f67f0063-5857-4a1a-b6f9-4d064d478125"
+      ],
       "children": [
         "8999c1ca-2652-4937-ac01-584e4deba269",
         "0ea142f9-0f2b-4db2-890b-27b4ff4ca8c8",
@@ -167,7 +179,9 @@
       "avatar": ""
     },
     "rels": {
-      "spouses": ["c086272b-8592-4a10-8c72-4053a62abdb1"],
+      "spouses": [
+        "c086272b-8592-4a10-8c72-4053a62abdb1"
+      ],
       "children": [
         "c3954b4d-a2a7-49a2-ad8f-0b54d1aea8b2",
         "96a84e5a-79bb-405c-80d3-56dcd72bbc05",
@@ -229,7 +243,9 @@
       "avatar": ""
     },
     "rels": {
-      "spouses": ["5582913f-6c1b-496f-8a8b-7ae913115d9c"],
+      "spouses": [
+        "5582913f-6c1b-496f-8a8b-7ae913115d9c"
+      ],
       "children": [
         "8999c1ca-2652-4937-ac01-584e4deba269",
         "0ea142f9-0f2b-4db2-890b-27b4ff4ca8c8",
