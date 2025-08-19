@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fa-IR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>my-family-chart</title>
+    <script src="https://unpkg.com/d3@6"></script>
+    <script type="module" src="https://unpkg.com/family-chart@0.7.2"></script>
+    <script
+      type="module"
+      src="https://requirejs.org/docs/release/2.3.7/minified/require.js"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/family-chart@0.7.2/dist/styles/family-chart.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="FamilyChart" class="f3"></div>
+
+    <script type="module">
+      import { Octokit } from "https://cdn.skypack.dev/@octokit/rest";
+      fetch("./data.json")
+        .then((res) => res.json())
+        .then((data) => create(data))
+        .catch((err) => console.error(err));
+
+      function create(data) {
+        const f3Chart = f3
+          .createChart("#FamilyChart", data)
+          .setTransitionTime(1000)
+          .setCardXSpacing(250)
+          .setCardYSpacing(150)
+          .setSingleParentEmptyCard(true, { label: "ADD" })
+          .setShowSiblingsOfMain(false)
+          .setOrientationVertical()
+          .setDuplicateBranchToggle(true)
+          .setSortChildrenFunction((a, b) =>
+            a.data["birthday"] === b.data["birthday"]
+              ? 0
+              : a.data["birthday"] > b.data["birthday"]
+              ? -1
+              : 1
+          );
+
+        const f3Card = f3Chart
+          .setCard(f3.CardHtml)
+          .setCardDisplay([["first name", "last name"], ["birthday"]])
+          .setCardDim({})
+          .setMiniTree(true)
+          .setStyle("imageRect")
+          .setOnHoverPathToMain();
+
+        const f3EditTree = f3Chart
+          .editTree()
+          .fixed(true)
+          .setFields(["first name", "last name", "birthday", "avatar"])
+          .setEditFirst(true)
+          .setCardClickOpen(f3Card)
+          .setOnChange(() => {
+            // const fs = require("fs");
+            // const fileName = "./data.json";
+            const updatedData = f3EditTree.getStoreDataCopy();
+            console.log(updatedData);
+            const submitBotton = document.querySelector(
+              ".f3-form-buttons button[type='submit']"
+            );
+            submitBotton.disabled = true;
+            submitBotton.textContent = "...";
+            setTimeout(() => {
+              submitBotton.disabled = false;
+              submitBotton.textContent = "Submit";
+            }, 2000);
+
+            // fs.writeFile(
+            //   fileName,
+            //   JSON.stringify(updatedData, null, 2),
+            //   function writeJSON(err) {
+            //     if (err) return console.log(err);
+            //     // console.log(JSON.stringify(updatedData));
+            //     console.log("writing to " + fileName);
+            //   }
+            // );
+          });
+
+        f3EditTree.setEdit();
+
+        f3Chart.updateTree({ initial: true });
+        f3EditTree.open(f3Chart.getMainDatum());
+
+        f3Chart.updateTree({ initial: true });
+      }
+    </script>
+  </body>
+</html>
