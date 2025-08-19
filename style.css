@@ -8,6 +8,28 @@ body {
   font-family: "B Nazanin", Tahoma, Arial, sans-serif;
 }
 
+#status {
+  direction: rtl;
+  position: relative;
+  bottom: -16px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 8px 12px;
+  color: #fff;
+  border-radius: 8px;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.status-success {
+  background-color: green;
+}
+
+.status-error {
+  background-color: #721c24;
+}
+
 .f3 {
   width: 100%;
   height: 100vh;

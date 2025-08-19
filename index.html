@@ -21,10 +21,121 @@
 
     <script type="module">
       import { Octokit } from "https://cdn.skypack.dev/@octokit/rest";
-      fetch("./data.json")
+
+      const GITHUB_USERNAME = "wanderer-code";
+      const GITHUB_REPO = "n-family-tree";
+      const FILE_PATH = "data.json";
+      const TOKEN = "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";
+
+      const octokit = new Octokit({ auth: TOKEN });
+
+      fetch(FILE_PATH)
         .then((res) => res.json())
         .then((data) => create(data))
         .catch((err) => console.error(err));
+
+      function objectsEqual(o1, o2) {
+        return typeof o1 === "object" && Object.keys(o1).length > 0
+          ? Object.keys(o1).length === Object.keys(o2).length &&
+              Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
+          : o1 === o2;
+      }
+
+      function arraysEqual(a1, a2) {
+        return (
+          a1.length === a2.length &&
+          a1.every((o, idx) => objectsEqual(o, a2[idx]))
+        );
+      }
+
+      function createStatusDiv() {
+        const familyFormElem = document.getElementById("familyForm");
+        const statusDiv = document.createElement("div");
+        statusDiv.setAttribute("id", "status");
+        familyFormElem.appendChild(statusDiv);
+        return statusDiv;
+      }
+
+      function setStatus(statusDiv, message, type) {
+        statusDiv.textContent = message;
+        statusDiv.className = `status-${type}`; // 'success', 'error'
+      }
+
+      function setStatusByCase(statusDiv, statusCase) {
+        if (statusCase == "success") {
+          setStatus(statusDiv, "تغییرات با موفقیت اعمال شد.", "success");
+        } else if (statusCase == "error") {
+          setStatus(statusDiv, "خطایی در ذخیره‌سازی رخ داده است.", "error");
+        } else if (statusCase == "token") {
+          setStatus(
+            statusDiv,
+            "مشکلی در توکن ذخیره‌سازی پیش آمده. لطفا به سازنده اطلاع دهید.",
+            "error"
+          );
+        } else {
+          setStatus(statusDiv, "خطای ناشناخته", "error");
+        }
+      }
+
+      function showThenDistroyStatusDiv(
+        statusDiv,
+        statusCase,
+        startTime,
+        endTime
+      ) {
+        setTimeout(() => {
+          setStatusByCase(statusDiv, statusCase);
+          statusDiv.style.visibility = "visible";
+          statusDiv.style.opacity = 1;
+        }, startTime);
+        setTimeout(() => {
+          statusDiv.style.opacity = 0;
+        }, endTime);
+        setTimeout(() => {
+          statusDiv.style.visibility = "hidden";
+          statusDiv.className = "";
+          statusDiv.textContent = "";
+          statusDiv.remove();
+        }, endTime + 1000);
+      }
+
+      async function updateFileOnGitHub(statusDiv, updatedData) {
+        const submitBotton = document.querySelector(
+          ".f3-form-buttons button[type='submit']"
+        );
+        submitBotton.textContent = "Saving...";
+        submitBotton.disabled = true;
+
+        try {
+          const { data: currentFile } = await octokit.repos.getContent({
+            owner: GITHUB_USERNAME,
+            repo: GITHUB_REPO,
+            path: FILE_PATH,
+          });
+
+          // todo: if data and updatedData are equal, do not update.
+
+          const formattedData = btoa(
+            unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2)))
+          );
+
+          await octokit.repos.createOrUpdateFileContents({
+            owner: GITHUB_USERNAME,
+            repo: GITHUB_REPO,
+            path: FILE_PATH,
+            message: `docs: Update ${FILE_PATH} via web editor`,
+            content: formattedData,
+            sha: currentFile.sha, // Required for updates
+          });
+          showThenDistroyStatusDiv(statusDiv, "success", 0, 2000);
+        } catch (error) {
+          console.error("Error updating file:", error);
+          showThenDistroyStatusDiv(statusDiv, "error", 0, 2000);
+        } finally {
+          submitBotton.disabled = false;
+          submitBotton.textContent = "Submit";
+        }
+      }
 
       function create(data) {
         const f3Chart = f3
@@ -59,29 +170,36 @@
           .setEditFirst(true)
           .setCardClickOpen(f3Card)
           .setOnChange(() => {
-            // const fs = require("fs");
-            // const fileName = "./data.json";
+            const statusDiv = createStatusDiv();
             const updatedData = f3EditTree.getStoreDataCopy();
-            console.log(updatedData);
-            const submitBotton = document.querySelector(
-              ".f3-form-buttons button[type='submit']"
-            );
-            submitBotton.disabled = true;
-            submitBotton.textContent = "...";
-            setTimeout(() => {
-              submitBotton.disabled = false;
-              submitBotton.textContent = "Submit";
-            }, 2000);
 
-            // fs.writeFile(
-            //   fileName,
-            //   JSON.stringify(updatedData, null, 2),
-            //   function writeJSON(err) {
-            //     if (err) return console.log(err);
-            //     // console.log(JSON.stringify(updatedData));
-            //     console.log("writing to " + fileName);
-            //   }
+            updateFileOnGitHub(statusDiv, updatedData);
+            // // const fs = require("fs");
+            // // const fileName = "./data.json";
+            // const updatedData = f3EditTree.getStoreDataCopy();
+
+            // const submitBotton = document.querySelector(
+            //   ".f3-form-buttons button[type='submit']"
             // );
+            // submitBotton.disabled = true;
+            // submitBotton.textContent = "Saving...";
+
+            // const statusDiv = createStatusDiv();
+            // setTimeout(() => {
+            //   submitBotton.disabled = false;
+            //   submitBotton.textContent = "Submit";
+            // }, 2000);
+            // showThenDistroyStatusDiv(statusDiv, "tosken", 2000, 4000);
+
+            // // fs.writeFile(
+            // //   fileName,
+            // //   JSON.stringify(updatedData, null, 2),
+            // //   function writeJSON(err) {
+            // //     if (err) return console.log(err);
+            // //     // console.log(JSON.stringify(updatedData));
+            // //     console.log("writing to " + fileName);
+            // //   }
+            // // );
           });
 
         f3EditTree.setEdit();
