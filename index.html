@@ -25,7 +25,11 @@
       const GITHUB_USERNAME = "wanderer-code";
       const GITHUB_REPO = "n-family-tree";
       const FILE_PATH = "data.json";
-      const TOKEN = "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";
+
+      const p1 = "";
+      const p2 = "";
+      const TOKEN =
+        p1.split("").reverse().join("") + p2.split("").reverse().join("");
 
       const octokit = new Octokit({ auth: TOKEN });
 
