@@ -6,10 +6,6 @@
     <title>my-family-chart</title>
     <script src="https://unpkg.com/d3@6"></script>
     <script type="module" src="https://unpkg.com/family-chart@0.7.2"></script>
-    <script
-      type="module"
-      src="https://requirejs.org/docs/release/2.3.7/minified/require.js"
-    ></script>
     <link
       rel="stylesheet"
       href="https://unpkg.com/family-chart@0.7.2/dist/styles/family-chart.css"
@@ -18,6 +14,44 @@
   </head>
   <body>
     <div id="FamilyChart" class="f3"></div>
+    <div id="page">
+      <button class="btn modal-btn" data-open-modal="#demoModal">
+        آپلود تغییرات
+      </button>
+    </div>
+
+    <!-- Overlay + Modal -->
+    <div class="modal-overlay" data-open="false" aria-hidden="true">
+      <div class="modal" id="demoModal" role="dialog" aria-modal="true">
+        <button class="modal-close" data-close-modal aria-label="Close dialog">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M6 6l12 12M18 6L6 18"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+
+        <header class="modal-header">
+          <h2 class="modal-title">توکن (کد ورودی) را وارد نمایید.</h2>
+        </header>
+
+        <div class="modal-body">
+          <div class="textfield">
+            <input id="inputWord" type="text" required placeholder=" " />
+            <label for="inputWord">توکن</label>
+          </div>
+          <div class="textfield-error" id="errorMsg"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn cancel-btn" data-close-modal>لغو</button>
+          <button class="btn save-btn" id="primaryBtn" disabled>ذخیره</button>
+        </div>
+      </div>
+    </div>
 
     <script type="module">
       import { Octokit } from "https://cdn.skypack.dev/@octokit/rest";
@@ -25,98 +59,114 @@
       const GITHUB_USERNAME = "wanderer-code";
       const GITHUB_REPO = "n-family-tree";
       const FILE_PATH = "data.json";
-      const TOKEN = "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";
 
-      const octokit = new Octokit({ auth: TOKEN });
-      console.log(octokit);
+      const overlay = document.querySelector(".modal-overlay");
+      const modal = document.getElementById("demoModal");
+      const openBtn = document.querySelector("[data-open-modal]");
+      const closeButtons = modal.querySelectorAll("[data-close-modal]");
+      const input = document.getElementById("inputWord");
+      const errorMsg = document.getElementById("errorMsg");
+      const primaryBtn = document.getElementById("primaryBtn");
+      const page = document.getElementById("page");
 
-      fetch(FILE_PATH)
+      let updatedData = null;
+      let lastFocused = null;
+      let sendData = true;
+
+      fetch(
+        "https://raw.githubusercontent.com/wanderer-code/n-family-tree/refs/heads/main/data.json"
+      )
         .then((res) => res.json())
         .then((data) => create(data))
         .catch((err) => console.error(err));
 
-      function objectsEqual(o1, o2) {
-        return typeof o1 === "object" && Object.keys(o1).length > 0
-          ? Object.keys(o1).length === Object.keys(o2).length &&
-              Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
-          : o1 === o2;
-      }
+      // function objectsEqual(o1, o2) {
+      //   return typeof o1 === "object" && Object.keys(o1).length > 0
+      //     ? Object.keys(o1).length === Object.keys(o2).length &&
+      //         Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
+      //     : o1 === o2;
+      // }
 
-      function arraysEqual(a1, a2) {
-        return (
-          a1.length === a2.length &&
-          a1.every((o, idx) => objectsEqual(o, a2[idx]))
-        );
-      }
+      // function arraysEqual(a1, a2) {
+      //   return (
+      //     a1.length === a2.length &&
+      //     a1.every((o, idx) => objectsEqual(o, a2[idx]))
+      //   );
+      // }
 
-      function createStatusDiv() {
-        const familyFormElem = document.getElementById("familyForm");
-        const statusDiv = document.createElement("div");
-        statusDiv.setAttribute("id", "status");
-        familyFormElem.appendChild(statusDiv);
-        return statusDiv;
-      }
+      async function getLastWorkflow(octokit) {
+        try {
+          const { data: wfStatuses } =
+            await octokit.rest.actions.listWorkflowRunsForRepo({
+              owner: GITHUB_USERNAME,
+              repo: GITHUB_REPO,
+              _: new Date().getTime(),
+            });
 
-      function setStatus(statusDiv, message, type) {
-        statusDiv.textContent = message;
-        statusDiv.className = `status-${type}`; // 'success', 'error'
-      }
+          console.log(wfStatuses);
 
-      function setStatusByCase(statusDiv, statusCase) {
-        if (statusCase == "success") {
-          setStatus(statusDiv, "تغییرات با موفقیت اعمال شد.", "success");
-        } else if (statusCase == "error") {
-          setStatus(statusDiv, "خطایی در ذخیره‌سازی رخ داده است.", "error");
-        } else if (statusCase == "token") {
-          setStatus(
-            statusDiv,
-            "مشکلی در توکن ذخیره‌سازی پیش آمده. لطفا به سازنده اطلاع دهید.",
-            "error"
-          );
-        } else {
-          setStatus(statusDiv, "خطای ناشناخته", "error");
+          if (wfStatuses.workflow_runs.length > 0) {
+            const lastWorkflowStatus = wfStatuses.workflow_runs[0];
+            if (lastWorkflowStatus.status === "completed")
+              return lastWorkflowStatus.conclusion;
+            return lastWorkflowStatus.status;
+          } else {
+            console.log("No workflow found for this repository.");
+            return null;
+          }
+        } catch (error) {
+          console.error("Error fetching workflows:", error);
+          return null;
         }
       }
 
-      function showThenDistroyStatusDiv(
-        statusDiv,
-        statusCase,
-        startTime,
-        endTime
-      ) {
-        setTimeout(() => {
-          setStatusByCase(statusDiv, statusCase);
-          statusDiv.style.visibility = "visible";
-          statusDiv.style.opacity = 1;
-        }, startTime);
-        setTimeout(() => {
-          statusDiv.style.opacity = 0;
-        }, endTime);
-        setTimeout(() => {
-          statusDiv.style.visibility = "hidden";
-          statusDiv.className = "";
-          statusDiv.textContent = "";
-          statusDiv.remove();
-        }, endTime + 1000);
+      async function pollDeploymentStatus(octokit) {
+        try {
+          const workflowStatus = await getLastWorkflow(octokit);
+
+          console.log(workflowStatus);
+
+          if (workflowStatus === "success") {
+            return true;
+          }
+
+          if (workflowStatus === "failure") {
+            alert(
+              "ثبت تغییرات با شکست مواجه شد. مجددا داده‌ها ارسال می‌گردند."
+            );
+            return true;
+          }
+
+          if (
+            workflowStatus === "queued" ||
+            workflowStatus === "in_progress" ||
+            workflowStatus === "pending" ||
+            workflowStatus === "waiting"
+          ) {
+            alert("لطفا کمی منتظر بمانید.");
+            return false;
+          }
+
+          alert(
+            "وضعیت آپلود مشخص نیست. لطفا صفحه را رفرش کنید و دوباره امتحان کنید."
+          );
+          return false;
+        } catch (error) {
+          console.error("Error checking deployment status:", error);
+          alert(
+            "وضعیت آپلود مشخص نیست. لطفا صفحه را رفرش کنید و دوباره امتحان کنید."
+          );
+          return false;
+        }
       }
 
-      async function updateFileOnGitHub(statusDiv, updatedData) {
-        const submitBotton = document.querySelector(
-          ".f3-form-buttons button[type='submit']"
-        );
-        submitBotton.textContent = "Saving...";
-        submitBotton.disabled = true;
-
+      async function updateFileOnGitHub(updatedData, octokit) {
         try {
           const { data: currentFile } = await octokit.repos.getContent({
             owner: GITHUB_USERNAME,
             repo: GITHUB_REPO,
             path: FILE_PATH,
           });
-
-          console.log(currentFile);
-
-          // todo: if data and updatedData are equal, do not update.
 
           const formattedData = btoa(
             unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2)))
@@ -130,13 +180,15 @@
             content: formattedData,
             sha: currentFile.sha, // Required for updates
           });
-          showThenDistroyStatusDiv(statusDiv, "success", 0, 2000);
+
+          alert("داده‌ها با موفقیت ذخیره شد. تا ارسال بعدی کمی صبر کنید.");
+          closeModal();
+          setTimeout(() => {});
         } catch (error) {
           console.error("Error updating file:", error);
-          showThenDistroyStatusDiv(statusDiv, "error", 0, 2000);
-        } finally {
-          submitBotton.disabled = false;
-          submitBotton.textContent = "Submit";
+          if (error.response.status === 401)
+            errorMsg.textContent = "احتمالا توکن ورودی شما نادرست است.";
+          else errorMsg.textContent = "مشکلی پیش آمده.";
         }
       }
 
@@ -173,36 +225,7 @@
           .setEditFirst(true)
           .setCardClickOpen(f3Card)
           .setOnChange(() => {
-            const statusDiv = createStatusDiv();
-            const updatedData = f3EditTree.getStoreDataCopy();
-
-            updateFileOnGitHub(statusDiv, updatedData);
-            // // const fs = require("fs");
-            // // const fileName = "./data.json";
-            // const updatedData = f3EditTree.getStoreDataCopy();
-
-            // const submitBotton = document.querySelector(
-            //   ".f3-form-buttons button[type='submit']"
-            // );
-            // submitBotton.disabled = true;
-            // submitBotton.textContent = "Saving...";
-
-            // const statusDiv = createStatusDiv();
-            // setTimeout(() => {
-            //   submitBotton.disabled = false;
-            //   submitBotton.textContent = "Submit";
-            // }, 2000);
-            // showThenDistroyStatusDiv(statusDiv, "tosken", 2000, 4000);
-
-            // // fs.writeFile(
-            // //   fileName,
-            // //   JSON.stringify(updatedData, null, 2),
-            // //   function writeJSON(err) {
-            // //     if (err) return console.log(err);
-            // //     // console.log(JSON.stringify(updatedData));
-            // //     console.log("writing to " + fileName);
-            // //   }
-            // // );
+            updatedData = f3EditTree.getStoreDataCopy();
           });
 
         f3EditTree.setEdit();
@@ -212,6 +235,99 @@
 
         f3Chart.updateTree({ initial: true });
       }
+
+      function getFocusable(container) {
+        return [
+          ...container.querySelectorAll(
+            'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+          ),
+        ].filter(
+          (el) => el.offsetParent !== null || el === document.activeElement
+        );
+      }
+
+      function openModal() {
+        lastFocused = document.activeElement;
+        overlay.dataset.open = "true";
+        overlay.removeAttribute("aria-hidden");
+        document.body.classList.add("modal-open");
+        page?.setAttribute("aria-hidden", "true");
+        input.focus();
+        document.addEventListener("keydown", onKeyDown);
+        overlay.addEventListener("mousedown", onOverlayMouseDown);
+      }
+      function closeModal() {
+        overlay.dataset.open = "false";
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.classList.remove("modal-open");
+        page?.removeAttribute("aria-hidden");
+        document.removeEventListener("keydown", onKeyDown);
+        overlay.removeEventListener("mousedown", onOverlayMouseDown);
+        if (lastFocused && typeof lastFocused.focus === "function")
+          lastFocused.focus();
+        // reset form state
+        input.value = "";
+        errorMsg.textContent = "";
+        primaryBtn.disabled = true;
+      }
+
+      function onKeyDown(e) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+        if (e.key === "Tab") {
+          const f = getFocusable(modal);
+          if (!f.length) {
+            e.preventDefault();
+            modal.focus();
+            return;
+          }
+          const first = f[0],
+            last = f[f.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+
+      let clickStartedInside = false;
+      function onOverlayMouseDown(e) {
+        clickStartedInside = modal.contains(e.target);
+        overlay.addEventListener("click", onOverlayClickOnce, { once: true });
+      }
+      function onOverlayClickOnce(e) {
+        const clickedInside = modal.contains(e.target);
+        if (!clickedInside && !clickStartedInside) closeModal();
+      }
+
+      // Input logic
+      input.addEventListener("input", () => {
+        primaryBtn.disabled = input.value.trim() === "";
+        errorMsg.textContent = ""; // clear error on typing
+      });
+
+      primaryBtn.addEventListener("click", async () => {
+        const TOKEN = input.value.trim();
+        const octokit = new Octokit({ auth: TOKEN });
+        if (!updatedData) alert("لطفا ابتدا تغییری در اطلاعات انجام دهید.");
+        else {
+          const uploadData = await pollDeploymentStatus(octokit);
+          if (uploadData) updateFileOnGitHub(updatedData, octokit);
+        }
+      });
+
+      // Wire up
+      openBtn.addEventListener("click", openModal);
+      closeButtons.forEach((btn) => btn.addEventListener("click", closeModal));
+      overlay.addEventListener("wheel", (e) => e.preventDefault(), {
+        passive: false,
+      });
     </script>
   </body>
 </html>

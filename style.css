@@ -1,3 +1,15 @@
+:root {
+  --modal-width: min(560px, 92vw);
+  --modal-radius: 14px;
+  --surface: #ffffff;
+  --text: #0b0f14;
+  --muted: #6b7280;
+  --overlay: 255 255 255;
+  --shadow: 0 15px 45px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.08);
+  --ring: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  --error: #dc2626;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,6 +18,192 @@
 
 body {
   font-family: "B Nazanin", Tahoma, Arial, sans-serif;
+}
+
+#page {
+  direction: rtl;
+}
+
+.btn {
+  appearance: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  background-color: white;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+.btn:hover:enabled {
+  background-color: #f3f4f6;
+}
+.btn:active:enabled {
+  transform: translateY(1px) scale(0.99);
+}
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.modal-btn {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  transform: translate(-50%, 0);
+  background-color: #f9d88b;
+  z-index: 10;
+}
+.modal-btn:hover:enabled {
+  background-color: #f3cf7b;
+}
+.modal-btn:active:enabled {
+  transform: translate(-50%, 1px) scale(0.99);
+}
+
+.cancel-btn {
+  background-color: #fc9696;
+}
+.cancel-btn:hover:enabled {
+  background-color: #f08888;
+}
+
+.save-btn {
+  background-color: #73ca7e;
+  padding: 12px 32px;
+}
+.save-btn:hover:enabled {
+  background-color: #69c174;
+}
+
+/* Overlay */
+.modal-overlay {
+  position: absolute;
+  height: 100vh;
+  inset: 0;
+  background: rgba(var(--overlay), 0.42);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  z-index: 1000;
+}
+.modal-overlay[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Modal */
+.modal {
+  transform: translate(-50%, -50%);
+  width: var(--modal-width);
+  background: var(--surface);
+  border-radius: var(--modal-radius);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transform: translateY(8px) scale(0.98);
+  opacity: 0;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.22s ease;
+  position: relative;
+}
+.modal-overlay[data-open="true"] .modal {
+  direction: rtl;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.modal-header {
+  padding: 16px;
+}
+.modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.modal-body {
+  padding: 0 16px 16px 16px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 16px 16px 16px;
+}
+
+/* Close button */
+.modal-close {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.modal-close:hover {
+  background: #f3f4f6;
+}
+.modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Textfield */
+.textfield {
+  position: relative;
+  margin-top: 10px;
+}
+.textfield input {
+  direction: ltr;
+  width: 100%;
+  padding: 12px 12px 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.textfield input:focus {
+  border-color: #2563eb;
+  box-shadow: var(--ring);
+}
+.textfield label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+  color: var(--muted);
+  pointer-events: none;
+  transition: all 0.18s ease;
+  background: var(--surface);
+  padding: 0 4px;
+}
+.textfield input:focus + label,
+.textfield input:not(:placeholder-shown) + label {
+  top: -6px;
+  font-size: 0.75rem;
+  color: #2563eb;
+}
+
+.textfield-error {
+  font-size: 0.75rem;
+  color: var(--error);
+  margin-top: 4px;
+  min-height: 1em; /* Reserve space even when empty */
 }
 
 #status {
