@@ -234,6 +234,76 @@
         f3EditTree.open(f3Chart.getMainDatum());
 
         f3Chart.updateTree({ initial: true });
+
+        const genderRadio = document.querySelector(
+          "#familyForm .f3-radio-group"
+        );
+        const maleGenderRadio = document.querySelector(
+          '#familyForm .f3-radio-group input[value="M"]'
+        );
+        const femaleGenderRadio = document.querySelector(
+          '#familyForm .f3-radio-group input[value="F"]'
+        );
+        const formFields = document.querySelectorAll(
+          "#familyForm .f3-form-field"
+        );
+
+        const formButtons = document.querySelector(
+          "#familyForm .f3-form-buttons"
+        );
+        const formCancelButton = document.querySelector(
+          "#familyForm .f3-form-buttons .f3-cancel-btn"
+        );
+        const formSubmitButton = document.querySelector(
+          '#familyForm .f3-form-buttons button[type="submit"]'
+        );
+        const formDeleteButton = document.querySelector(
+          "#familyForm .f3-delete-btn"
+        );
+        const formRemoveRelationButton = document.querySelector(
+          "#familyForm .f3-remove-relative-btn"
+        );
+
+        genderRadio.style.direction = "rtl";
+
+        maleGenderRadio.parentNode.childNodes[2].textContent =
+          maleGenderRadio.parentNode.childNodes[2].textContent.replace(
+            "Male",
+            "آقا"
+          );
+        femaleGenderRadio.parentNode.childNodes[2].textContent =
+          femaleGenderRadio.parentNode.childNodes[2].textContent.replace(
+            "Female",
+            "خانم"
+          );
+
+        formFields.forEach((field) => {
+          field.style.direction = "rtl";
+          const fieldLabel = field.querySelector("label");
+          const fieldInput = field.querySelector("input");
+          if (fieldLabel.textContent === "first name") {
+            fieldLabel.textContent = "نام";
+            fieldInput.setAttribute("placeholder", "نام");
+          }
+          if (fieldLabel.textContent === "last name") {
+            fieldLabel.textContent = "نام خانوادگی";
+            fieldInput.setAttribute("placeholder", "نام خانوادگی");
+          }
+          if (fieldLabel.textContent === "birthday") {
+            fieldLabel.textContent = "تولد";
+            fieldInput.setAttribute("placeholder", "سال تولد");
+          }
+          if (fieldLabel.textContent === "avatar") {
+            fieldLabel.textContent = "پروفایل";
+            fieldInput.setAttribute("placeholder", "لینک آنلاین عکس پروفایل");
+          }
+        });
+
+        formButtons.style.direction = "rtl";
+        formCancelButton.textContent = "لغو";
+        formSubmitButton.textContent = "ثبت";
+        formDeleteButton.textContent = "حذف";
+        formRemoveRelationButton.textContent = "حذف رابطه";
       }
 
       function getFocusable(container) {
