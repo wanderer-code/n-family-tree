@@ -88,7 +88,11 @@
     },
     "rels": {
       "mother": "77b25d09-bc50-4245-af84-ee8383c4e6ec",
-      "father": "c71339e6-7b79-4b16-a684-d53b381320d8"
+      "father": "c71339e6-7b79-4b16-a684-d53b381320d8",
+      "spouses": [
+        "4e98d5c5-855a-451b-b837-8afa6989e992"
+      ],
+      "children": []
     }
   },
   {
@@ -295,6 +299,22 @@
     "rels": {
       "father": "f67f0063-5857-4a1a-b6f9-4d064d478125",
       "mother": "5582913f-6c1b-496f-8a8b-7ae913115d9c"
+    }
+  },
+  {
+    "id": "4e98d5c5-855a-451b-b837-8afa6989e992",
+    "data": {
+      "gender": "M",
+      "first name": "محمدرضا",
+      "last name": "ناصری",
+      "birthday": "۱۳۷۱",
+      "avatar": ""
+    },
+    "rels": {
+      "spouses": [
+        "7b060be6-5b13-422f-b4d9-32f0f0f55bd3"
+      ],
+      "children": []
     }
   }
 ]
