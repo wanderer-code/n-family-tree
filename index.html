@@ -25,13 +25,10 @@
       const GITHUB_USERNAME = "wanderer-code";
       const GITHUB_REPO = "n-family-tree";
       const FILE_PATH = "data.json";
-
-      const p1 = "Venqfdkk2lrnkOR0e_phg";
-      const p2 = "P2pFw3ZBdBzfnvKHbWw";
-      const TOKEN =
-        p1.split("").reverse().join("") + p2.split("").reverse().join("");
+      const TOKEN = "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";
 
       const octokit = new Octokit({ auth: TOKEN });
+      console.log(octokit);
 
       fetch(FILE_PATH)
         .then((res) => res.json())
@@ -116,6 +113,8 @@
             repo: GITHUB_REPO,
             path: FILE_PATH,
           });
+
+          console.log(currentFile);
 
           // todo: if data and updatedData are equal, do not update.
 
