@@ -26,8 +26,8 @@ async function main() {
     // Enhance the chart with our custom spouse feature
     ChartEnhancements.initialize(f3Chart, f3EditTree);
 
-    f3EditTree.setOnChange((newChartData) => {
-      updatedData = newChartData;
+    f3EditTree.setOnChange(() => {
+      updatedData = f3EditTree.getStoreDataCopy();
       // Enable the button as soon as a change is detected
       uploadChangesBtn.disabled = false;
     });
