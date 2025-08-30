@@ -206,27 +206,7 @@ body {
   min-height: 1em; /* Reserve space even when empty */
 }
 
-#status {
-  direction: rtl;
-  position: relative;
-  bottom: -16px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 8px 12px;
-  color: #fff;
-  border-radius: 8px;
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.5s;
-}
-
-.status-success {
-  background-color: green;
-}
-
-.status-error {
-  background-color: #721c24;
-}
+/* REMOVED UNUSED STATUS STYLES */
 
 .f3 {
   width: 100%;
@@ -238,4 +218,72 @@ body {
 
 .card {
   direction: rtl;
+}
+
+/* --- ADDED CSS FOR SPOUSE SELECTOR MODAL --- */
+.spouse-selector-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spouse-selector-modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh; /* Limits the modal height */
+  display: flex;
+  flex-direction: column;
+}
+.spouse-selector-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  direction: rtl;
+  flex-shrink: 0; /* Prevents header from shrinking */
+}
+.spouse-selector-modal-header h3 {
+  margin: 0;
+}
+.spouse-selector-modal-body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0; /* Important for flex children scrolling */
+}
+.spouse-selector-modal-body input {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  direction: rtl;
+  flex-shrink: 0; /* Prevents input from shrinking */
+}
+.spouse-selector-results {
+  flex-grow: 1;
+  overflow-y: auto; /* Enables vertical scrolling */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.spouse-result-item {
+  padding: 10px;
+  cursor: pointer;
+  direction: rtl;
+  border-bottom: 1px solid #eee;
+}
+.spouse-result-item:hover {
+  background-color: #f0f0f0;
+}
+.spouse-result-item:last-child {
+  border-bottom: none;
 }

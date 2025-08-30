@@ -4,23 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>my-family-chart</title>
+    <!-- External Libraries -->
     <script src="https://unpkg.com/d3@6"></script>
-    <script type="module" src="https://unpkg.com/family-chart@0.7.2"></script>
+    <script type="module" src="https://unpkg.com/family-chart@0.7.4"></script>
+
+    <!-- Stylesheets -->
     <link
       rel="stylesheet"
-      href="https://unpkg.com/family-chart@0.7.2/dist/styles/family-chart.css"
+      href="https://unpkg.com/family-chart@0.7.4/dist/styles/family-chart.css"
     />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- Main chart container -->
     <div id="FamilyChart" class="f3"></div>
+
+    <!-- Page elements for the modal button -->
     <div id="page">
-      <button class="btn modal-btn" data-open-modal="#demoModal">
+      <button class="btn modal-btn" data-open-modal="#demoModal" disabled>
         آپلود تغییرات
       </button>
     </div>
 
-    <!-- Overlay + Modal -->
+    <!-- GitHub Token Modal -->
     <div class="modal-overlay" data-open="false" aria-hidden="true">
       <div class="modal" id="demoModal" role="dialog" aria-modal="true">
         <button class="modal-close" data-close-modal aria-label="Close dialog">
@@ -33,11 +39,9 @@
             />
           </svg>
         </button>
-
         <header class="modal-header">
           <h2 class="modal-title">توکن (کد ورودی) را وارد نمایید.</h2>
         </header>
-
         <div class="modal-body">
           <div class="textfield">
             <input id="inputWord" type="text" required placeholder=" " />
@@ -45,7 +49,6 @@
           </div>
           <div class="textfield-error" id="errorMsg"></div>
         </div>
-
         <div class="modal-actions">
           <button class="btn cancel-btn" data-close-modal>لغو</button>
           <button class="btn save-btn" id="primaryBtn" disabled>ذخیره</button>
@@ -53,351 +56,7 @@
       </div>
     </div>
 
-    <script type="module">
-      import { Octokit } from "https://cdn.skypack.dev/@octokit/rest";
-
-      const GITHUB_USERNAME = "wanderer-code";
-      const GITHUB_REPO = "n-family-tree";
-      const FILE_PATH = "data.json";
-
-      const overlay = document.querySelector(".modal-overlay");
-      const modal = document.getElementById("demoModal");
-      const openBtn = document.querySelector("[data-open-modal]");
-      const closeButtons = modal.querySelectorAll("[data-close-modal]");
-      const input = document.getElementById("inputWord");
-      const errorMsg = document.getElementById("errorMsg");
-      const primaryBtn = document.getElementById("primaryBtn");
-      const page = document.getElementById("page");
-
-      let updatedData = null;
-      let lastFocused = null;
-      let sendData = true;
-
-      fetch(
-        "https://raw.githubusercontent.com/wanderer-code/n-family-tree/refs/heads/main/data.json"
-      )
-        .then((res) => res.json())
-        .then((data) => create(data))
-        .catch((err) => console.error(err));
-
-      // function objectsEqual(o1, o2) {
-      //   return typeof o1 === "object" && Object.keys(o1).length > 0
-      //     ? Object.keys(o1).length === Object.keys(o2).length &&
-      //         Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
-      //     : o1 === o2;
-      // }
-
-      // function arraysEqual(a1, a2) {
-      //   return (
-      //     a1.length === a2.length &&
-      //     a1.every((o, idx) => objectsEqual(o, a2[idx]))
-      //   );
-      // }
-
-      async function getLastWorkflow(octokit) {
-        try {
-          const { data: wfStatuses } =
-            await octokit.rest.actions.listWorkflowRunsForRepo({
-              owner: GITHUB_USERNAME,
-              repo: GITHUB_REPO,
-              _: new Date().getTime(),
-            });
-
-          console.log(wfStatuses);
-
-          if (wfStatuses.workflow_runs.length > 0) {
-            const lastWorkflowStatus = wfStatuses.workflow_runs[0];
-            if (lastWorkflowStatus.status === "completed")
-              return lastWorkflowStatus.conclusion;
-            return lastWorkflowStatus.status;
-          } else {
-            console.log("No workflow found for this repository.");
-            return null;
-          }
-        } catch (error) {
-          console.error("Error fetching workflows:", error);
-          return null;
-        }
-      }
-
-      async function pollDeploymentStatus(octokit) {
-        try {
-          const workflowStatus = await getLastWorkflow(octokit);
-
-          console.log(workflowStatus);
-
-          if (workflowStatus === "success") {
-            return true;
-          }
-
-          if (workflowStatus === "failure") {
-            alert(
-              "ثبت تغییرات با شکست مواجه شد. مجددا داده‌ها ارسال می‌گردند."
-            );
-            return true;
-          }
-
-          if (
-            workflowStatus === "queued" ||
-            workflowStatus === "in_progress" ||
-            workflowStatus === "pending" ||
-            workflowStatus === "waiting"
-          ) {
-            alert("لطفا کمی منتظر بمانید.");
-            return false;
-          }
-
-          alert(
-            "وضعیت آپلود مشخص نیست. لطفا صفحه را رفرش کنید و دوباره امتحان کنید."
-          );
-          return false;
-        } catch (error) {
-          console.error("Error checking deployment status:", error);
-          alert(
-            "وضعیت آپلود مشخص نیست. لطفا صفحه را رفرش کنید و دوباره امتحان کنید."
-          );
-          return false;
-        }
-      }
-
-      async function updateFileOnGitHub(updatedData, octokit) {
-        try {
-          const { data: currentFile } = await octokit.repos.getContent({
-            owner: GITHUB_USERNAME,
-            repo: GITHUB_REPO,
-            path: FILE_PATH,
-          });
-
-          const formattedData = btoa(
-            unescape(encodeURIComponent(JSON.stringify(updatedData, null, 2)))
-          );
-
-          await octokit.repos.createOrUpdateFileContents({
-            owner: GITHUB_USERNAME,
-            repo: GITHUB_REPO,
-            path: FILE_PATH,
-            message: `docs: Update ${FILE_PATH} via web editor`,
-            content: formattedData,
-            sha: currentFile.sha, // Required for updates
-          });
-
-          alert("داده‌ها با موفقیت ذخیره شد. تا ارسال بعدی کمی صبر کنید.");
-          closeModal();
-          setTimeout(() => {});
-        } catch (error) {
-          console.error("Error updating file:", error);
-          if (error.response.status === 401)
-            errorMsg.textContent = "احتمالا توکن ورودی شما نادرست است.";
-          else errorMsg.textContent = "مشکلی پیش آمده.";
-        }
-      }
-
-      function create(data) {
-        const f3Chart = f3
-          .createChart("#FamilyChart", data)
-          .setTransitionTime(1000)
-          .setCardXSpacing(250)
-          .setCardYSpacing(150)
-          .setSingleParentEmptyCard(true, { label: "ADD" })
-          .setShowSiblingsOfMain(false)
-          .setOrientationVertical()
-          .setDuplicateBranchToggle(true)
-          .setSortChildrenFunction((a, b) =>
-            a.data["birthday"] === b.data["birthday"]
-              ? 0
-              : a.data["birthday"] > b.data["birthday"]
-              ? -1
-              : 1
-          );
-
-        const f3Card = f3Chart
-          .setCard(f3.CardHtml)
-          .setCardDisplay([["first name", "last name"], ["birthday"]])
-          .setCardDim({})
-          .setMiniTree(true)
-          .setStyle("imageRect")
-          .setOnHoverPathToMain();
-
-        const f3EditTree = f3Chart
-          .editTree()
-          .fixed(true)
-          .setFields(["first name", "last name", "birthday", "avatar"])
-          .setEditFirst(true)
-          .setCardClickOpen(f3Card)
-          .setOnChange(() => {
-            updatedData = f3EditTree.getStoreDataCopy();
-          });
-
-        f3EditTree.setEdit();
-
-        f3Chart.updateTree({ initial: true });
-        f3EditTree.open(f3Chart.getMainDatum());
-
-        f3Chart.updateTree({ initial: true });
-
-        const genderRadio = document.querySelector(
-          "#familyForm .f3-radio-group"
-        );
-        const maleGenderRadio = document.querySelector(
-          '#familyForm .f3-radio-group input[value="M"]'
-        );
-        const femaleGenderRadio = document.querySelector(
-          '#familyForm .f3-radio-group input[value="F"]'
-        );
-        const formFields = document.querySelectorAll(
-          "#familyForm .f3-form-field"
-        );
-
-        const formButtons = document.querySelector(
-          "#familyForm .f3-form-buttons"
-        );
-        const formCancelButton = document.querySelector(
-          "#familyForm .f3-form-buttons .f3-cancel-btn"
-        );
-        const formSubmitButton = document.querySelector(
-          '#familyForm .f3-form-buttons button[type="submit"]'
-        );
-        const formDeleteButton = document.querySelector(
-          "#familyForm .f3-delete-btn"
-        );
-        const formRemoveRelationButton = document.querySelector(
-          "#familyForm .f3-remove-relative-btn"
-        );
-
-        genderRadio.style.direction = "rtl";
-
-        maleGenderRadio.parentNode.childNodes[2].textContent =
-          maleGenderRadio.parentNode.childNodes[2].textContent.replace(
-            "Male",
-            "آقا"
-          );
-        femaleGenderRadio.parentNode.childNodes[2].textContent =
-          femaleGenderRadio.parentNode.childNodes[2].textContent.replace(
-            "Female",
-            "خانم"
-          );
-
-        formFields.forEach((field) => {
-          field.style.direction = "rtl";
-          const fieldLabel = field.querySelector("label");
-          const fieldInput = field.querySelector("input");
-          if (fieldLabel.textContent === "first name") {
-            fieldLabel.textContent = "نام";
-            fieldInput.setAttribute("placeholder", "نام");
-          }
-          if (fieldLabel.textContent === "last name") {
-            fieldLabel.textContent = "نام خانوادگی";
-            fieldInput.setAttribute("placeholder", "نام خانوادگی");
-          }
-          if (fieldLabel.textContent === "birthday") {
-            fieldLabel.textContent = "تولد";
-            fieldInput.setAttribute("placeholder", "سال تولد");
-          }
-          if (fieldLabel.textContent === "avatar") {
-            fieldLabel.textContent = "پروفایل";
-            fieldInput.setAttribute("placeholder", "لینک آنلاین عکس پروفایل");
-          }
-        });
-
-        formButtons.style.direction = "rtl";
-        formCancelButton.textContent = "لغو";
-        formSubmitButton.textContent = "ثبت";
-        formDeleteButton.textContent = "حذف";
-        formRemoveRelationButton.textContent = "حذف رابطه";
-      }
-
-      function getFocusable(container) {
-        return [
-          ...container.querySelectorAll(
-            'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
-          ),
-        ].filter(
-          (el) => el.offsetParent !== null || el === document.activeElement
-        );
-      }
-
-      function openModal() {
-        lastFocused = document.activeElement;
-        overlay.dataset.open = "true";
-        overlay.removeAttribute("aria-hidden");
-        document.body.classList.add("modal-open");
-        page?.setAttribute("aria-hidden", "true");
-        input.focus();
-        document.addEventListener("keydown", onKeyDown);
-        overlay.addEventListener("mousedown", onOverlayMouseDown);
-      }
-      function closeModal() {
-        overlay.dataset.open = "false";
-        overlay.setAttribute("aria-hidden", "true");
-        document.body.classList.remove("modal-open");
-        page?.removeAttribute("aria-hidden");
-        document.removeEventListener("keydown", onKeyDown);
-        overlay.removeEventListener("mousedown", onOverlayMouseDown);
-        if (lastFocused && typeof lastFocused.focus === "function")
-          lastFocused.focus();
-        // reset form state
-        input.value = "";
-        errorMsg.textContent = "";
-        primaryBtn.disabled = true;
-      }
-
-      function onKeyDown(e) {
-        if (e.key === "Escape") {
-          e.preventDefault();
-          closeModal();
-          return;
-        }
-        if (e.key === "Tab") {
-          const f = getFocusable(modal);
-          if (!f.length) {
-            e.preventDefault();
-            modal.focus();
-            return;
-          }
-          const first = f[0],
-            last = f[f.length - 1];
-          if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault();
-            last.focus();
-          } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault();
-            first.focus();
-          }
-        }
-      }
-
-      let clickStartedInside = false;
-      function onOverlayMouseDown(e) {
-        clickStartedInside = modal.contains(e.target);
-        overlay.addEventListener("click", onOverlayClickOnce, { once: true });
-      }
-      function onOverlayClickOnce(e) {
-        const clickedInside = modal.contains(e.target);
-        if (!clickedInside && !clickStartedInside) closeModal();
-      }
-
-      // Input logic
-      input.addEventListener("input", () => {
-        primaryBtn.disabled = input.value.trim() === "";
-        errorMsg.textContent = ""; // clear error on typing
-      });
-
-      primaryBtn.addEventListener("click", async () => {
-        const TOKEN = input.value.trim();
-        const octokit = new Octokit({ auth: TOKEN });
-        if (!updatedData) alert("لطفا ابتدا تغییری در اطلاعات انجام دهید.");
-        else {
-          const uploadData = await pollDeploymentStatus(octokit);
-          if (uploadData) updateFileOnGitHub(updatedData, octokit);
-        }
-      });
-
-      // Wire up
-      openBtn.addEventListener("click", openModal);
-      closeButtons.forEach((btn) => btn.addEventListener("click", closeModal));
-      overlay.addEventListener("wheel", (e) => e.preventDefault(), {
-        passive: false,
-      });
-    </script>
+    <!-- Main JavaScript Entry Point -->
+    <script type="module" src="js/main.js"></script>
   </body>
 </html>
