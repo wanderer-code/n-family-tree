@@ -133,10 +133,11 @@
     "id": "c086272b-8592-4a10-8c72-4053a62abdb1",
     "data": {
       "gender": "F",
-      "first name": "فهمیمه",
+      "first name": "فهیمه",
       "last name": "امانت",
       "birthday": "۱۳۴۰",
-      "avatar": ""
+      "avatar": "",
+      "death date": ""
     },
     "rels": {
       "mother": "c2b72d8c-72fe-46fe-b934-25341eeab49f",
