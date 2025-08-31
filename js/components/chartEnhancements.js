@@ -378,26 +378,6 @@ function initializeAddRelativeObserver() {
   observer.observe(targetNode, config);
 }
 
-function initializeFormObserver() {
-  const targetNode = document.body;
-  const config = { childList: true, subtree: true };
-
-  const callback = function (mutationsList, observer) {
-    for (const mutation of mutationsList) {
-      if (mutation.addedNodes.length > 0) {
-        // Check if the form itself was added, or if it's inside what was added
-        const form = document.querySelector("#familyForm");
-        if (form) {
-          customizeEditForm();
-        }
-      }
-    }
-  };
-
-  const observer = new MutationObserver(callback);
-  observer.observe(targetNode, config);
-}
-
 function addLinkExistingButton(form, buttonText, onClickCallback) {
   if (form.querySelector(".link-existing-person-btn")) return; // Don't add if it already exists
 
@@ -422,12 +402,54 @@ function addLinkExistingButton(form, buttonText, onClickCallback) {
   }
 }
 
+function initializeDynamicEnhancements() {
+  const searchContainer = document.querySelector(".search-container");
+  const isMobile = () => window.innerWidth <= 768;
+
+  // This single function will be our source of truth for updating the UI state.
+  const updateUIState = () => {
+    const form = document.querySelector("#familyForm");
+    const formIsOpen = !!form;
+
+    // Part 1: Handle Search Bar Visibility on Mobile
+    if (searchContainer) {
+      if (isMobile() && formIsOpen) {
+        searchContainer.classList.add("form-is-open");
+      } else {
+        searchContainer.classList.remove("form-is-open");
+      }
+    }
+
+    // Part 2: Handle Form Translation
+    // If the form exists and hasn't been translated yet, translate it.
+    if (formIsOpen) {
+      customizeEditForm();
+    }
+  };
+
+  // The observer watches the entire document for nodes being added or removed.
+  // 'subtree: true' is essential to catch the form appearing anywhere.
+  const observer = new MutationObserver(() => {
+    // When any change happens, just re-run our state update function.
+    // This is simple and covers all cases (form open, form close, etc.).
+    updateUIState();
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Also, re-run the state update on resize for responsiveness.
+  window.addEventListener("resize", updateUIState);
+
+  // Run it once on startup.
+  updateUIState();
+}
+
 /**
  * The main function that applies our custom features to the chart.
  */
 export function initialize(f3Chart, f3EditTree) {
+  initializeDynamicEnhancements();
   initializeAddRelativeObserver();
-  initializeFormObserver();
 
   const originalOpen = f3EditTree.open;
 
@@ -437,6 +459,8 @@ export function initialize(f3Chart, f3EditTree) {
     setTimeout(() => {
       const form = document.querySelector("#familyForm");
       if (!form) return;
+
+      customizeEditForm();
 
       const newRelData = datum["_new_rel_data"];
 

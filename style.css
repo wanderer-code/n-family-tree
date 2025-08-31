@@ -345,6 +345,15 @@ body {
   z-index: 1000;
 }
 
+@media (max-width: 768px) {
+  .search-container.form-is-open {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-20px) translateX(-50%);
+    transition: all 0.2s ease-in-out;
+  }
+}
+
 .search-icon {
   position: absolute;
   right: 15px; /* Icon on the right */
@@ -424,4 +433,22 @@ body {
 .search-result-item.focused {
   /* For keyboard navigation */
   background-color: #f3f4f6;
+}
+
+/* Styles for the new close button at the bottom of the form */
+.f3-form-close-bottom-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 16px;
+  background-color: #f3f4f6; /* A neutral gray */
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  font-weight: 500;
+  font-family: inherit; /* Ensure it uses the correct font */
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.f3-form-close-bottom-btn:hover {
+  background-color: #e5e7eb;
 }
