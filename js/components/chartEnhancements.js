@@ -80,13 +80,12 @@ function openLinkExistingPersonModal(
   currentPersonId,
   relType,
   f3Chart,
-  f3EditTree
+  f3EditTree,
+  placeholderIdToDelete = null
 ) {
   const rule = RELATIONSHIP_RULES[relType];
   const allPeople = f3EditTree.getStoreDataCopy();
-  const currentPerson = allPeople.find((p) => p.id === currentPersonId);
-
-  // Define all relatives of the current person to exclude them from the list
+  const currentPerson = allPeople.find((p) => p.id === currentPersonId); // This is the child in the placeholder scenario
   const existingRelationsIds = new Set(
     [
       currentPersonId,
@@ -97,15 +96,12 @@ function openLinkExistingPersonModal(
       currentPerson.rels.mother,
     ].filter(Boolean)
   );
-
-  // Filter people by relationship and gender
   let eligiblePeople = allPeople.filter((p) => !existingRelationsIds.has(p.id));
   if (rule.gender) {
     eligiblePeople = eligiblePeople.filter(
       (p) => p.data.gender === rule.gender || !p.data.gender
     );
   }
-
   const modalOverlay = document.createElement("div");
   modalOverlay.className = "spouse-selector-modal-overlay";
   modalOverlay.innerHTML = `
@@ -123,13 +119,11 @@ function openLinkExistingPersonModal(
             </div>
         </div>`;
   document.body.appendChild(modalOverlay);
-
   const searchInput = modalOverlay.querySelector("input");
   const resultsContainer = modalOverlay.querySelector(
     ".spouse-selector-results"
   );
   const closeModal = () => document.body.removeChild(modalOverlay);
-
   const renderResults = (people) => {
     resultsContainer.innerHTML =
       people.length === 0
@@ -143,7 +137,6 @@ function openLinkExistingPersonModal(
             )
             .join("");
   };
-
   modalOverlay
     .querySelector(".modal-close")
     .addEventListener("click", closeModal);
@@ -168,7 +161,44 @@ function openLinkExistingPersonModal(
       const selectedPersonId = target.dataset.id;
       const store = f3Chart.store.getData();
 
-      linkPeople(currentPersonId, selectedPersonId, relType, store);
+      if (placeholderIdToDelete) {
+        // Find the live child object in the store
+        const child = store.find((p) => p.id === currentPersonId);
+
+        // 1. Unlink from Spouse: Find the other parent and remove the placeholder from their spouse list.
+        const otherParent = store.find((p) =>
+          p.rels.spouses?.includes(placeholderIdToDelete)
+        );
+        if (otherParent) {
+          otherParent.rels.spouses = otherParent.rels.spouses.filter(
+            (id) => id !== placeholderIdToDelete
+          );
+          // Establish the new spousal link between the other parent and the selected person
+          linkPeople(otherParent.id, selectedPersonId, "spouse", store);
+        }
+
+        // 2. Unlink from Child: Remove the placeholder's ID from the child's 'father' or 'mother' field.
+        // This is the CRITICAL step you correctly identified.
+        if (child.rels.father === placeholderIdToDelete) {
+          delete child.rels.father;
+        } else if (child.rels.mother === placeholderIdToDelete) {
+          delete child.rels.mother;
+        }
+
+        // 3. Establish the new parent-child relationship.
+        linkPeople(currentPersonId, selectedPersonId, relType, store);
+
+        // 4. Finally, it is now safe to delete the placeholder object.
+        const placeholderIndex = store.findIndex(
+          (p) => p.id === placeholderIdToDelete
+        );
+        if (placeholderIndex > -1) {
+          store.splice(placeholderIndex, 1);
+        }
+      } else {
+        // Standard link operation
+        linkPeople(currentPersonId, selectedPersonId, relType, store);
+      }
 
       f3Chart.updateTree();
       closeModal();
@@ -323,6 +353,30 @@ function initializeFormObserver() {
   observer.observe(targetNode, config);
 }
 
+function addLinkExistingButton(form, buttonText, onClickCallback) {
+  if (form.querySelector(".link-existing-person-btn")) return; // Don't add if it already exists
+
+  const newButton = document.createElement("button");
+  newButton.type = "button";
+  newButton.textContent = buttonText;
+  newButton.className = "btn link-existing-person-btn";
+  newButton.style.width = "100%";
+  newButton.style.marginBottom = "10px";
+  newButton.onclick = (e) => {
+    e.stopPropagation();
+    onClickCallback();
+  };
+
+  // Robustly insert the button at the top of the form's content
+  const firstField = form.querySelector(".f3-form-field");
+  if (firstField) {
+    firstField.parentElement.insertBefore(newButton, firstField);
+  } else {
+    // Fallback if no fields exist (less likely)
+    form.appendChild(newButton);
+  }
+}
+
 /**
  * The main function that applies our custom features to the chart.
  */
@@ -336,60 +390,80 @@ export function initialize(f3Chart, f3EditTree) {
     originalOpen.apply(this, arguments);
 
     setTimeout(() => {
-      const addCardTranslations = {
-        spouse: fa.addSpouse,
-        father: fa.addFather,
-        mother: fa.addMother,
-        son: fa.addSon,
-        daughter: fa.addDaughter,
-      };
+      const form = document.querySelector("#familyForm");
+      if (!form) return;
+
       const newRelData = datum["_new_rel_data"];
+
+      // --- PATH 1: User is adding a new relative from a '+' button ---
       if (newRelData) {
         const relType = newRelData.rel_type;
         const rule = RELATIONSHIP_RULES[relType];
 
-        // If the relationship type is one we support for linking, add the button
+        const titleElement = form.querySelector(".f3-form-title");
+        const addCardTranslations = {
+          spouse: fa.addSpouse,
+          father: fa.addFather,
+          mother: fa.addMother,
+          son: fa.addSon,
+          daughter: fa.addDaughter,
+        };
+        if (titleElement && addCardTranslations[relType]) {
+          titleElement.textContent = addCardTranslations[relType];
+        }
+
         if (rule) {
-          const form = document.querySelector("#familyForm");
-          if (form && !form.querySelector(".link-existing-person-btn")) {
-            const personId = f3EditTree.store.getLastAvailableMainDatum().id;
-            const newButton = document.createElement("button");
-            newButton.type = "button";
-            newButton.textContent = fa[rule.buttonTextKey];
-            newButton.className = "btn link-existing-person-btn";
-            newButton.style.width = "100%";
-            newButton.style.marginBottom = "10px";
-
-            newButton.onclick = (e) => {
-              e.stopPropagation();
-              const currentPersonData = f3Chart.store
-                .getData()
-                .find((p) => p.id === personId);
-
-              // Business Rule: Prevent adding a parent if one already exists
-              if (relType === "father" && currentPersonData.rels.father) {
-                alert(fa.personHasParent("M"));
-                return;
-              }
-              if (relType === "mother" && currentPersonData.rels.mother) {
-                alert(fa.personHasParent("F"));
-                return;
-              }
-
-              openLinkExistingPersonModal(
-                personId,
-                relType,
-                f3Chart,
-                f3EditTree
-              );
-            };
-
-            const titleElement = form.querySelector(".f3-form-title");
-            if (titleElement) {
-              titleElement.insertAdjacentElement("afterend", newButton);
+          const personId = f3EditTree.store.getLastAvailableMainDatum().id;
+          const onClickCallback = () => {
+            const currentPersonData = f3Chart.store
+              .getData()
+              .find((p) => p.id === personId);
+            if (
+              (relType === "father" && currentPersonData.rels.father) ||
+              (relType === "mother" && currentPersonData.rels.mother)
+            ) {
+              alert(fa.personHasParent(rule.gender));
+              return;
             }
-            titleElement.textContent = addCardTranslations[relType];
+            openLinkExistingPersonModal(personId, relType, f3Chart, f3EditTree);
+          };
+          addLinkExistingButton(form, fa[rule.buttonTextKey], onClickCallback);
+        }
+
+        // --- PATH 2: User has clicked an empty ".card-to-add" placeholder ---
+      } else if (
+        document.querySelector(`.card-to-add[data-id="${datum.id}"]`)
+      ) {
+        const store = f3Chart.store.getData();
+        const placeholderId = datum.id;
+        let child, relType;
+
+        // Find which person is the child of this placeholder card
+        for (const person of store) {
+          if (person.rels.father === placeholderId) {
+            child = person;
+            relType = "father";
+            break;
           }
+          if (person.rels.mother === placeholderId) {
+            child = person;
+            relType = "mother";
+            break;
+          }
+        }
+
+        if (child && relType) {
+          const rule = RELATIONSHIP_RULES[relType];
+          const onClickCallback = () => {
+            openLinkExistingPersonModal(
+              child.id,
+              relType,
+              f3Chart,
+              f3EditTree,
+              placeholderId
+            );
+          };
+          addLinkExistingButton(form, fa[rule.buttonTextKey], onClickCallback);
         }
       }
     }, 0);
