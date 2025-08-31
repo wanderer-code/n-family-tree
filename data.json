@@ -126,7 +126,9 @@
       ],
       "spouses": [
         "93afa518-dbf4-4022-84e7-e8850fa0bf6c"
-      ]
+      ],
+      "father": "af825895-1495-4531-8b5a-cded2bb7208e",
+      "mother": "d708cdf3-2d7c-4509-9769-c2c6372b6ebf"
     }
   },
   {
@@ -316,6 +318,152 @@
         "7b060be6-5b13-422f-b4d9-32f0f0f55bd3"
       ],
       "children": []
+    }
+  },
+  {
+    "id": "af825895-1495-4531-8b5a-cded2bb7208e",
+    "data": {
+      "gender": "M",
+      "first name": "میرزا محمد",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "children": [
+        "c2b72d8c-72fe-46fe-b934-25341eeab49f"
+      ],
+      "spouses": [
+        "d708cdf3-2d7c-4509-9769-c2c6372b6ebf"
+      ]
+    }
+  },
+  {
+    "id": "d708cdf3-2d7c-4509-9769-c2c6372b6ebf",
+    "data": {
+      "gender": "F",
+      "first name": "رخساره بیگم",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "children": [
+        "c2b72d8c-72fe-46fe-b934-25341eeab49f"
+      ],
+      "spouses": [
+        "af825895-1495-4531-8b5a-cded2bb7208e"
+      ],
+      "father": "5083a842-0f74-4f6f-bbab-594930984205",
+      "mother": "75981351-d77f-4dec-8883-5b3bc169eb54"
+    }
+  },
+  {
+    "id": "5083a842-0f74-4f6f-bbab-594930984205",
+    "data": {
+      "gender": "M",
+      "first name": "میرزا اسدالله",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "children": [
+        "d708cdf3-2d7c-4509-9769-c2c6372b6ebf",
+        "4e8a138d-0b3c-4aab-a376-a81a1bcac548",
+        "973f6ff9-f713-4190-b3fa-1b919ed54f7f",
+        "97396332-b1a8-48aa-9517-0119766aef1f",
+        "02c1b529-6329-430e-a53d-f3bee217bf7d"
+      ],
+      "spouses": [
+        "75981351-d77f-4dec-8883-5b3bc169eb54"
+      ]
+    }
+  },
+  {
+    "id": "75981351-d77f-4dec-8883-5b3bc169eb54",
+    "data": {
+      "gender": "F",
+      "first name": "سیده زهرا بیگم",
+      "last name": "مصطفوی",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "spouses": [
+        "5083a842-0f74-4f6f-bbab-594930984205"
+      ],
+      "children": [
+        "d708cdf3-2d7c-4509-9769-c2c6372b6ebf",
+        "4e8a138d-0b3c-4aab-a376-a81a1bcac548",
+        "973f6ff9-f713-4190-b3fa-1b919ed54f7f",
+        "97396332-b1a8-48aa-9517-0119766aef1f",
+        "02c1b529-6329-430e-a53d-f3bee217bf7d"
+      ]
+    }
+  },
+  {
+    "id": "4e8a138d-0b3c-4aab-a376-a81a1bcac548",
+    "data": {
+      "gender": "M",
+      "first name": "حاج غلامرضا",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "father": "5083a842-0f74-4f6f-bbab-594930984205",
+      "mother": "75981351-d77f-4dec-8883-5b3bc169eb54"
+    }
+  },
+  {
+    "id": "973f6ff9-f713-4190-b3fa-1b919ed54f7f",
+    "data": {
+      "gender": "M",
+      "first name": "حاج غلامحسین",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "father": "5083a842-0f74-4f6f-bbab-594930984205",
+      "mother": "75981351-d77f-4dec-8883-5b3bc169eb54"
+    }
+  },
+  {
+    "id": "97396332-b1a8-48aa-9517-0119766aef1f",
+    "data": {
+      "gender": "F",
+      "first name": "ربابه",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "mother": "75981351-d77f-4dec-8883-5b3bc169eb54",
+      "father": "5083a842-0f74-4f6f-bbab-594930984205"
+    }
+  },
+  {
+    "id": "02c1b529-6329-430e-a53d-f3bee217bf7d",
+    "data": {
+      "gender": "F",
+      "first name": "خانم",
+      "last name": "داوری",
+      "birthday": "",
+      "death date": "",
+      "avatar": ""
+    },
+    "rels": {
+      "mother": "75981351-d77f-4dec-8883-5b3bc169eb54",
+      "father": "5083a842-0f74-4f6f-bbab-594930984205"
     }
   }
 ]
