@@ -20,6 +20,11 @@ export const fa = {
   genericError: "مشکلی پیش آمده.",
   noChangesMade: "لطفا ابتدا تغییری در اطلاعات انجام دهید.",
 
+  // Confirmation Modal
+  deleteConfirmMessage: "آیا از حذف این فرد مطمئن هستید؟",
+  removeRelationConfirmMessage: "آیا از حذف رابطه برای این فرد مطمئن هستید؟",
+  confirm: "تایید",
+
   // --- NEW: Generic Relationship Linking ---
   linkExistingPerson: "انتخاب از افراد موجود",
   linkExistingParent: "اتصال والد موجود",

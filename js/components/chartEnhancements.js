@@ -1,5 +1,6 @@
 // js/components/chartEnhancements.js
 import { fa } from "../i18n.js";
+import * as ConfirmationModal from "./confirmationModal.js";
 
 // --- CONFIGURATION: Defines rules for each relationship type ---
 const RELATIONSHIP_RULES = {
@@ -277,6 +278,50 @@ function customizeEditForm() {
     const button = form.querySelector(selector);
     if (button) button.textContent = text;
   });
+
+  // Helper function to set up the confirmation flow for a button
+  const setupConfirmation = (button, message) => {
+    if (!button) return;
+
+    // This listener is for the *actual* user click. It's in the capture phase to run first.
+    button.addEventListener(
+      "click",
+      function (e) {
+        // We only care about real user clicks, not programmatic ones.
+        if (e.isTrusted) {
+          // Stop the original event completely. The library will not see this click.
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Show the modal. If confirmed, dispatch our custom event.
+          ConfirmationModal.show(message, () => {
+            button.dispatchEvent(
+              new CustomEvent("confirmed-click", { bubbles: false })
+            );
+          });
+        }
+      },
+      { capture: true }
+    ); // The 'capture: true' is the key!
+
+    // This listener waits for our custom event, which is only sent after confirmation.
+    button.addEventListener("confirmed-click", function () {
+      // Now, we programmatically click the button. This click is NOT trusted,
+      // so the capture listener ignores it, and it proceeds directly to the
+      // library's own click handler.
+      button.click();
+    });
+  };
+
+  // Set up the confirmation for both buttons
+  setupConfirmation(
+    form.querySelector(".f3-delete-btn"),
+    fa.deleteConfirmMessage
+  );
+  setupConfirmation(
+    form.querySelector(".f3-remove-relative-btn"),
+    fa.removeRelationConfirmMessage
+  );
 
   form.setAttribute("data-translated", "true");
 }

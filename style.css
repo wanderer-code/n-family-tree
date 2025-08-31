@@ -287,3 +287,50 @@ body {
 .spouse-result-item:last-child {
   border-bottom: none;
 }
+
+/* --- ADDED CSS FOR CONFIRMATION MODAL --- */
+.confirmation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2000; /* Higher than other modals */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.confirmation-modal {
+  background: var(--surface);
+  color: var(--text);
+  padding: 24px;
+  border-radius: var(--modal-radius);
+  width: 90%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  direction: rtl;
+}
+.confirmation-modal-body p {
+  margin: 0 0 24px 0;
+  font-size: 1.1rem;
+}
+.confirmation-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+.confirmation-modal-actions .confirm-btn {
+  background-color: #fc9696; /* Red for destructive action */
+}
+.confirmation-modal-actions .confirm-btn:hover:enabled {
+  background-color: #f08888;
+}
+.confirmation-modal-actions .cancel-btn {
+  background-color: #f3f4f6;
+}
+
+.confirmation-modal-actions .cancel-btn:hover:enabled {
+  background-color: #e5e7eb; /* A nice, neutral gray */
+}
