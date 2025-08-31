@@ -19,6 +19,18 @@
     <!-- Main chart container -->
     <div id="FamilyChart" class="f3"></div>
 
+    <div class="search-container" role="search">
+      <svg class="search-icon" viewBox="0 0 20 20" fill="currentColor">
+        <path
+          fill-rule="evenodd"
+          d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+          clip-rule="evenodd"
+        />
+      </svg>
+      <input type="search" id="searchInput" placeholder="" autocomplete="off" />
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
     <!-- Page elements for the modal button -->
     <div id="page">
       <button class="btn modal-btn" data-open-modal="#demoModal" disabled>

@@ -334,3 +334,94 @@ body {
 .confirmation-modal-actions .cancel-btn:hover:enabled {
   background-color: #e5e7eb; /* A nice, neutral gray */
 }
+
+.search-container {
+  position: fixed;
+  top: 20px;
+  left: 50%; /* Unset left positioning */
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  z-index: 1000;
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px; /* Icon on the right */
+  left: auto; /* Unset left */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 12px 45px 12px 15px; /* Padding adjusted for icon on the right */
+  font-size: 1rem;
+  font-family: inherit;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--surface);
+  color: var(--text);
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+  outline: none;
+  -webkit-appearance: none;
+  transition: box-shadow 0.2s ease;
+  direction: rtl; /* Set text direction to RTL */
+}
+
+#searchInput:focus {
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+/* Hide browser's default clear button */
+#searchInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 8px); /* Position below the input with a small gap */
+  left: 0;
+  width: 100%;
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+  max-height: 40vh; /* Limit height and allow scrolling */
+  overflow-y: auto;
+  direction: rtl; /* Set for Persian names */
+
+  /* Hide/show transition */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.search-results.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.search-result-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  font-size: 1rem;
+  transition: background-color 0.15s ease;
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover,
+.search-result-item.focused {
+  /* For keyboard navigation */
+  background-color: #f3f4f6;
+}

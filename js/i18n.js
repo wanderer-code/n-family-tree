@@ -25,6 +25,9 @@ export const fa = {
   removeRelationConfirmMessage: "آیا از حذف رابطه برای این فرد مطمئن هستید؟",
   confirm: "تایید",
 
+  // Search Component
+  searchPlaceholder: "جستجوی فرد...",
+
   // --- NEW: Generic Relationship Linking ---
   linkExistingPerson: "انتخاب از افراد موجود",
   linkExistingParent: "اتصال والد موجود",

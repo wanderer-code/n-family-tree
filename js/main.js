@@ -2,8 +2,8 @@ import { DATA_URL } from "./config.js";
 import { updateDataOnGitHub } from "./services/githubService.js";
 import * as TokenModal from "./components/tokenModal.js";
 import * as Chart from "./components/chartComponent.js";
-// --- UPDATED IMPORT ---
 import * as ChartEnhancements from "./components/chartEnhancements.js";
+import * as Search from "./components/searchComponent.js";
 import { fa } from "./i18n.js";
 
 // The application's state
@@ -11,6 +11,10 @@ let updatedData = null;
 
 async function main() {
   const uploadChangesBtn = document.querySelector("[data-open-modal]");
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.placeholder = fa.searchPlaceholder;
+  }
 
   try {
     // 1. Load initial data
@@ -22,10 +26,20 @@ async function main() {
     // 2. Create the chart and get its instances
     const { f3Chart, f3EditTree } = Chart.initialize(data);
 
-    // 3. --- UPDATED CALL ---
-    // Enhance the chart with our custom spouse feature
+    // 3. Enhance the chart with our custom spouse feature
     ChartEnhancements.initialize(f3Chart, f3EditTree);
 
+    function updateTreeWithNewMainPerson(person_id, animation_initial = true) {
+      f3Chart.updateMainId(person_id);
+      f3Chart.updateTree({ initial: animation_initial });
+    }
+
+    Search.initialize(data, (personId) => {
+      // This is the callback that runs when a person is selected
+      updateTreeWithNewMainPerson(personId, false);
+    });
+
+    // 4. Set a listener for when chart data changes
     f3EditTree.setOnChange(() => {
       updatedData = f3EditTree.getStoreDataCopy();
       // Enable the button as soon as a change is detected
