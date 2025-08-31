@@ -20,6 +20,10 @@ export const fa = {
   genericError: "مشکلی پیش آمده.",
   noChangesMade: "لطفا ابتدا تغییری در اطلاعات انجام دهید.",
 
+  // Icon Tooltips
+  editPerson: "ویرایش فرد",
+  addRelative: "افزودن خویشاوند",
+
   // Confirmation Modal
   deleteConfirmMessage: "آیا از حذف این فرد مطمئن هستید؟",
   removeRelationConfirmMessage: "آیا از حذف رابطه برای این فرد مطمئن هستید؟",

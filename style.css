@@ -50,6 +50,24 @@ body {
   cursor: not-allowed;
 }
 
+.f3 .f3-svg-circle-hover circle {
+  transition: fill 0.2s ease-in-out;
+}
+
+.f3 .f3-svg-circle-hover:hover circle {
+  fill: rgba(255, 255, 255, 0.2) !important; /* Lighter for our dark theme */
+}
+
+.f3 .card:not(.card-new-rel) .card-inner {
+  transition: transform 0.1s ease-out, filter 0.1s ease-out;
+}
+
+/* 2. Define the active state when a card is being clicked/touched */
+.f3 .card:not(.card-new-rel) .card-inner:active {
+  transform: scale(0.97); /* Shrink the card slightly */
+  filter: brightness(0.95); /* Make it a little darker */
+}
+
 .modal-btn {
   position: fixed;
   left: 50%;
